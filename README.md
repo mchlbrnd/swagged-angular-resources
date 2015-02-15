@@ -12,14 +12,16 @@ $ swagged-angular-resource <swagger-docs-url|swagger-docs-file>
 ```
 
 *Develop with swagged-angular-resources*
-1) Fork or clone this repository
-2)
+Fork or clone this repository!
+Then
 ```bash
 $ npm install 
 ```
-3)
+and then
+```bash
+$ npm link
+```
+and then
 ```bash
 $ gulp watch
 ```
-4) npm link
-5) Start developing!
