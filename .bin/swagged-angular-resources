@@ -31,7 +31,6 @@ getParameters = (type, parameters) ->
 
 getResourceOperations = (apiDefinition) ->
   _.reduce(apiDefinition.paths, (memo, methods, path) ->
-    log path, methods
     _.each(methods, (operation, action) ->
       response = operation.responses["200"]
       if response and response.schema
