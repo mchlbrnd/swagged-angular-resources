@@ -1,8 +1,3 @@
-'use strict';
-
-require('angular');
-require('angular-resource');
-
 angular.module('swaggedAngularResources', ['ngResource'])
 .config(function($resourceProvider) {
   $resourceProvider.defaults.stripTrailingSlashes = false;
