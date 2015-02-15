@@ -1,39 +1,20 @@
 swagged-angular-resources
-========================
-AngularJS $resource code generator written in CoffeeScript for Swagger v2.0 documentated endpoints.	
-
-*Install globally through npm*
+=========================
+AngularJS $resource code generator written in CoffeeScript for Swagger v2.0 documentated endpoints.
+## Install globally through npm
 ```bash
 $ npm install -g swagged-angular-resources
 ```
-*Usage*
+## Usage
 ```bash
 $ swagged-angular-resources <swagger-docs-url|swagger-docs-file>
 ```
-
-*Develop with swagged-angular-resources*
-Fork or clone this repository!
-Then
-```bash
-$ npm install 
-```
-and then
-```bash
-$ npm link
-```
-and then
-```bash
-$ gulp watch
-```
-
-*Example*
+## Example
 Run the following command:
 ```bash
 $ swagged-angular-resources https://raw.githubusercontent.com/swagger-api/swagger-spec/master/examples/v2.0/json/petstore-expanded.json
 ```
-
 This will output the following AngularJS code:
-
 ```javascript
 angular.module('swaggedAngularResources', ['ngResource'])
 .config(function($resourceProvider) {
@@ -61,4 +42,16 @@ angular.module('swaggedAngularResources', ['ngResource'])
     });
   };
 });
+## Develop with swagged-angular-resources
+Fork or clone this repository! And then run:
+```bash
+$ npm install 
+```
+and then
+```bash
+$ npm link
+```
+and then
+```bash
+$ gulp watch
 ```

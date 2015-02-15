@@ -1,6 +1,6 @@
 {
   "name": "swagged-angular-resources",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "AngularJS $resource code generator written in CoffeeScript for Swagger v2.0 documentated endpoints.",
   "main": ".bin/swagged-angular-resources",
   "bin": {
