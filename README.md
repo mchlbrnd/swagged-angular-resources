@@ -42,6 +42,7 @@ angular.module('swaggedAngularResources', ['ngResource'])
     });
   };
 });
+```
 ## Develop with swagged-angular-resources
 Fork or clone this repository! And then run:
 ```bash
