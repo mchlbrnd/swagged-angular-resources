@@ -3,7 +3,7 @@ angular.module('swaggedAngularResources', ['ngResource'])
   $resourceProvider.defaults.stripTrailingSlashes = false;
 })
 {{#each resourceOperations}}
-.{{../angularProviderType}}('{{@key}}{{../angularProviderSuffix}}', function() {
+.{{../angularProviderType}}('{{capitalize @key}}{{../angularProviderSuffix}}', function() {
   this.$get = function($resource, apiUrl) {
     return $resource(null, null, {
       {{#each this}}
