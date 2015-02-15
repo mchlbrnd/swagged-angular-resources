@@ -8,7 +8,7 @@ _.str = require "underscore.string"
 handlebars = require "handlebars"
 
 if process.argv.length < 3
-  throw "Expected: swagged-angular-resource <swagger-docs-url|swagger-docs-file>"
+  throw "Expected: swagged-angular-resources <swagger-docs-url|swagger-docs-file>"
 
 log = () -> console.log.apply this, arguments
 
@@ -78,7 +78,7 @@ getCode = (error, apiDefinition) ->
     resourceOperations: resourceOperations
   }
 
-  fs.readFile("#{__dirname}/../templates/swagged-angular-resource-provider.hbs", {encoding: "utf-8"}, (error, template) ->
+  fs.readFile("#{__dirname}/../templates/swagged-angular-resources-provider.hbs", {encoding: "utf-8"}, (error, template) ->
     if error
       throw error
     else
