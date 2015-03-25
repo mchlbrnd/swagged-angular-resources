@@ -1,28 +1,36 @@
-angular.module('swaggedAngularResources', ['ngResource'])
-.config(function($resourceProvider) {
-  $resourceProvider.defaults.stripTrailingSlashes = false;
-})
-{{#each resourceOperations}}
-.{{../angularProviderType}}('{{capitalize @key}}{{../angularProviderSuffix}}', function() {
-  this.$get = function($resource, apiUrl) {
-    return $resource(null, null, {
-      {{#each this}}
-      {{nickname}}: {
-        method: '{{action}}',
-        url: apiUrl + '{{path}}',
-        {{#if pathParameters}}
-        params: {
-          {{#each pathParameters}}
-          '{{name}}': '@{{name}}',
-          {{/each}}
+'use strict'
+
+(function(angular) {
+  angular.module('{{angularModuleName}}', [
+    require('angular-resource')
+  ])
+  .config(function($resourceProvider) {
+    $resourceProvider.defaults.stripTrailingSlashes = false;
+  })
+  {{#each resourceOperations}}
+  .{{../angularProviderType}}('{{capitalize @key}}{{../angularProviderSuffix}}', function() {
+    this.$get = function($resource, apiUrl) {
+      return $resource(null, null, {
+        {{#each this}}
+        {{nickname}}: {
+          method: '{{action}}',
+          url: apiUrl + '{{path}}',
+          {{#if pathParameters}}
+          params: {
+            {{#each pathParameters}}
+            '{{name}}': '@{{name}}',
+            {{/each}}
+          },
+          {{/if}}
+          {{#isQuery}}
+          isArray: true,
+          {{/isQuery}}
         },
-        {{/if}}
-        {{#isQuery}}
-        isArray: true,
-        {{/isQuery}}
-      },
-      {{/each}}
-    });
-  };
-})
-{{/each}};
+        {{/each}}
+      });
+    };
+  })
+  {{/each}};
+
+  module.exports = '{{angularModuleName}}';
+})(angular);
