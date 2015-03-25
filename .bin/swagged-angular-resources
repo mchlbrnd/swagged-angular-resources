@@ -8,7 +8,7 @@ _.str = require "underscore.string"
 handlebars = require "handlebars"
 
 if process.argv.length < 3
-  throw "Expected: swagged-angular-resources <swagger-docs-url|swagger-docs-file>"
+  throw "Expected: swagged-angular-resources swagger-docs-url|swagger-docs-file <angular-module-name>"
 
 log = () -> console.log.apply this, arguments
 
