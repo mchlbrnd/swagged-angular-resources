@@ -72,6 +72,7 @@ getCode = (error, apiDefinition) ->
   resourceOperations = getResourceOperations(apiDefinition)
 
   context = {
+    angularModuleName: process.argv[3] || "swaggedAngularResources"
     angularProviderType: "provider"
     angularProviderSuffix: ""
     resourceOperations: resourceOperations
