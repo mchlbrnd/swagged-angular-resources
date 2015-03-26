@@ -44,7 +44,8 @@
     "handlebars": "^2.0.0",
     "request": "^2.49.0",
     "underscore": "^1.7.0",
-    "underscore.string": "^2.4.0"
+    "underscore.string": "^2.4.0",
+    "yargs": "^3.6.0"
   },
   "engines": {
     "node": ">=0.10.0"

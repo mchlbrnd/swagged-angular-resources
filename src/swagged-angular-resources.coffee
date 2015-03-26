@@ -6,9 +6,14 @@ url = require "url"
 _ = require "underscore"
 _.str = require "underscore.string"
 handlebars = require "handlebars"
+argv = require("yargs").argv
 
-if process.argv.length < 3
-  throw "Expected: swagged-angular-resources swagger-docs-url|swagger-docs-file <angular-module-name>"
+if argv._.length == 0
+  throw "Expected: swagged-angular-resources swagger-docs-url|swagger-docs-file <--angular-module-name=swaggedAngularResources> <--strip-trailing-slashes>=false>"
+
+fileOrUrl = argv._[0];
+moduleName = argv.angularModuleName || "swaggedAngularResources"
+stripTrailingSlashes = !!argv.stripTrailingSlashes
 
 log = () -> console.log.apply this, arguments
 
@@ -72,9 +77,10 @@ getCode = (error, apiDefinition) ->
   resourceOperations = getResourceOperations(apiDefinition)
 
   context = {
-    angularModuleName: process.argv[3] || "swaggedAngularResources"
+    angularModuleName: moduleName
     angularProviderType: "provider"
     angularProviderSuffix: ""
+    stripTrailingSlashes: stripTrailingSlashes
     resourceOperations: resourceOperations
   }
 
@@ -85,7 +91,7 @@ getCode = (error, apiDefinition) ->
       log handlebars.compile(template)(context)
   )
 
-apiUrlOrFile = url.parse process.argv[2]
+apiUrlOrFile = url.parse fileOrUrl
 
 if apiUrlOrFile.protocol != null
   readUrlAsJSON apiUrlOrFile, getCode

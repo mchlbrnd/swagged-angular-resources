@@ -7,12 +7,12 @@ $ npm install -g swagged-angular-resources
 ```
 ## Usage
 ```bash
-$ swagged-angular-resources swagger-docs-url|swagger-docs-file <angular-module-name>
+$ swagged-angular-resources swagger-docs-url|swagger-docs-file <angular-module-name=moduleName> <--strip-trailing-slashes>
 ```
 ## Example
 Run the following command:
 ```bash
-$ swagged-angular-resources https://raw.githubusercontent.com/swagger-api/swagger-spec/master/examples/v2.0/json/petstore-expanded.json
+$ swagged-angular-resources https://raw.githubusercontent.com/swagger-api/swagger-spec/master/examples/v2.0/json/petstore-expanded.json --angular-module-name=swaggedAngularResources --strip-trailing-slashes
 ```
 This will output the following AngularJS code:
 ```javascript
@@ -89,6 +89,17 @@ and then
 ```bash
 $ gulp watch
 ```
+
+## Changelog
+### 0.0.9
+- Changed angular module name argument (default: --angular-module-name=swaggedAngularResources)
+- Added configurable $resource strip trailing slashes configuration (default: --strip-trailing-slashes=false)
+- Added yargs for easier argument parsing
+
+### 0.0.8
+- Added configurable angular module name (2nd argument)
+- Added IIFE to provider template
+
 ## TODO
-- Add arguments to script such as (stripTrailingSlashes, default apiUrl value as argument or from Swagger docs..)
-- Service and Factory Handlebar templates
+- Add arguments to script such as (default apiUrl value as argument or from Swagger docs)
+- Add service and factory templates

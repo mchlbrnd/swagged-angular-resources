@@ -5,9 +5,11 @@
     .module('{{angularModuleName}}', [
       require('angular-resource')
     ])
+    {{#if stripTrailingSlashes}}
     .config(function($resourceProvider) {
       $resourceProvider.defaults.stripTrailingSlashes = false;
     })
+    {{/if}}
     {{#each resourceOperations}}
     .{{../angularProviderType}}('{{capitalize @key}}{{../angularProviderSuffix}}', function() {
       this.$get = function($resource, apiUrl) {
