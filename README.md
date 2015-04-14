@@ -91,6 +91,9 @@ $ gulp watch
 ```
 
 ## Changelog
+### 0.0.10
+- Added @ngdoc generation argument (default: --ngdoc=false)
+
 ### 0.0.9
 - Changed angular module name argument (default: --angular-module-name=swaggedAngularResources)
 - Added configurable $resource strip trailing slashes configuration (default: --strip-trailing-slashes=false)
