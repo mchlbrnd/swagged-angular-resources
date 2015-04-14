@@ -14,6 +14,7 @@ if argv._.length == 0
 fileOrUrl = argv._[0];
 moduleName = argv.angularModuleName || "swaggedAngularResources"
 stripTrailingSlashes = !!argv.stripTrailingSlashes
+ngdoc = !!argv.ngdoc
 
 log = () -> console.log.apply this, arguments
 
@@ -53,6 +54,7 @@ getResourceOperations = (apiDefinition) ->
           path: path.replace(/\{(.+)\}/g, ":$1")
           nickname: operation.operationId
           action: action.toUpperCase()
+          summary: operation.summary
 
           # build path parameters
           pathParameters: getParameters("path", operation.parameters)
@@ -82,6 +84,7 @@ getCode = (error, apiDefinition) ->
     angularProviderSuffix: ""
     stripTrailingSlashes: stripTrailingSlashes
     resourceOperations: resourceOperations
+    ngdoc: ngdoc
   }
 
   fs.readFile("#{__dirname}/../templates/swagged-angular-resources-provider.hbs", {encoding: "utf-8"}, (error, template) ->

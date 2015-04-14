@@ -1,8 +1,10 @@
 (function(angular) {
   'use strict';
 
+  var moduleName = '{{angularModuleName}}';
+
   angular
-    .module('{{angularModuleName}}', [
+    .module(moduleName, [
       require('angular-resource')
     ])
     {{#if stripTrailingSlashes}}
@@ -12,9 +14,26 @@
     {{/if}}
     {{#each resourceOperations}}
     .{{../angularProviderType}}('{{capitalize @key}}{{../angularProviderSuffix}}', function() {
+      {{#if ../ngdoc}}
+      /**
+      * @ngdoc service
+      * @name {{../../angularModuleName}}.{{capitalize @key}}{{../angularProviderSuffix}}
+      * @requires $resource
+      * @requires apiUrl
+      **/
+      {{/if}}
       this.$get = function($resource, apiUrl) {
         return $resource(null, null, {
           {{#each this}}
+          {{#if ../../ngdoc}}
+          /**
+          * @ngdoc method
+          * @name {{../../../angularModuleName}}.{{capitalize @key}}{{../../../angularProviderSuffix}}.method:{{nickname}}
+          * @methodOf {{../../../angularModuleName}}.{{capitalize @key}}{{../../../angularProviderSuffix}}
+          * @description
+          * {{summary}}
+          **/
+          {{/if}}
           {{nickname}}: {
             method: '{{action}}',
             url: apiUrl + '{{path}}',
@@ -35,5 +54,5 @@
     })
     {{/each}};
 
-    module.exports = '{{angularModuleName}}';
+    module.exports = moduleName;
 })(angular);
