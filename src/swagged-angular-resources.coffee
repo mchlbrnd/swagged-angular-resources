@@ -52,7 +52,7 @@ getResourceOperations = (apiDefinition) ->
 
         memo[modelDefinition].push({
           path: path.replace(/\{(.+)\}/g, ":$1")
-          nickname: operation.operationId
+          nickname: operation.operationId || modelDefinition + "_" + _.str.capitalize(action)
           action: action.toUpperCase()
           summary: operation.summary
 
