@@ -9,12 +9,17 @@ handlebars = require "handlebars"
 argv = require("yargs").argv
 
 if argv._.length == 0
-  throw "Expected: swagged-angular-resources swagger-docs-url|swagger-docs-file <--angular-module-name=swaggedAngularResources> <--strip-trailing-slashes>=false>"
+  throw "Expected: swagged-angular-resources swagger-docs-url|swagger-docs-file [--ngmodule swaggedAngularResources [--strip-trailing-slashes false [--output index.js [--mock-output false]]]]"
 
-fileOrUrl = argv._[0];
-moduleName = argv.angularModuleName || "swaggedAngularResources"
+providerTemplate = "#{__dirname}/../templates/resource-providers.hbs"
+mockTemplate = "#{__dirname}/../templates/httpBackend-mocks.hbs"
+
+fileOrUrl = argv._[0]
+ngModule = argv.ngModule || "swaggedAngularResources"
+ngModuleOutput = argv.output || "index.js"
 stripTrailingSlashes = !!argv.stripTrailingSlashes
 ngdoc = !!argv.ngdoc
+ngMockModuleOutput = argv.mock
 
 log = () -> console.log.apply this, arguments
 
@@ -46,6 +51,10 @@ getResourceOperations = (apiDefinition) ->
         else
           modelDefinition = response.schema.$ref
 
+      # TODO: add parameter for mimeType
+      mockedResponseMimeType = "application/json"
+      mockedResponse = JSON.stringify(response.examples[mockedResponseMimeType], null, 4) if response.examples and response.examples[mockedResponseMimeType]
+
       if modelDefinition
         modelDefinition = modelDefinition.match(/.+\/(.+)$/)[1]
         memo[modelDefinition] = memo[modelDefinition] || []
@@ -55,6 +64,9 @@ getResourceOperations = (apiDefinition) ->
           nickname: operation.operationId || modelDefinition + "_" + _.str.capitalize(action)
           action: action.toUpperCase()
           summary: operation.summary
+
+          # mock example data
+          mockedResponse: mockedResponse
 
           # build path parameters
           pathParameters: getParameters("path", operation.parameters)
@@ -79,7 +91,7 @@ getCode = (error, apiDefinition) ->
   resourceOperations = getResourceOperations(apiDefinition)
 
   context = {
-    angularModuleName: moduleName
+    ngModule: ngModule
     angularProviderType: "provider"
     angularProviderSuffix: ""
     stripTrailingSlashes: stripTrailingSlashes
@@ -87,12 +99,30 @@ getCode = (error, apiDefinition) ->
     ngdoc: ngdoc
   }
 
-  fs.readFile("#{__dirname}/../templates/swagged-angular-resources-provider.hbs", {encoding: "utf-8"}, (error, template) ->
+  # TODO encoding options and write readWrite function
+  fs.readFile(providerTemplate, {encoding: "utf-8"}, (error, template) ->
     if error
       throw error
     else
-      log handlebars.compile(template)(context)
+      code = handlebars.compile(template)(context)
+      fs.writeFile(ngModuleOutput, code, {encoding: "utf-8"}, (error) ->
+        if error
+          throw error
+      )
   )
+
+  if ngMockModuleOutput
+    fs.readFile(mockTemplate, {encoding: "utf-8"}, (error, template) ->
+      if error
+        throw error
+      else
+        log ngMockModuleOutput
+        code = handlebars.compile(template)(context)
+        fs.writeFile(ngMockModuleOutput, code, {encoding: "utf-8"}, (error) ->
+          if error
+            throw error
+        )
+    )
 
 apiUrlOrFile = url.parse fileOrUrl
 

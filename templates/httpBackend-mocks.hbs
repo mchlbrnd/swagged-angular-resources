@@ -1,0 +1,21 @@
+(function(angular) {
+    'use strict';
+
+    var moduleName = '{{angularModuleName}}.mocked';
+
+    require('angular-mocks');
+
+    angular
+        .module(moduleName, [
+            'ngMockE2E'
+        ])
+    .run(function(apiUrl, $httpBackend) {
+    {{#each resourceOperations}}
+        {{#each this}}
+            $httpBackend.when{{action}}(apiUrl + '{{path}}').respond({{{mockedResponse}}});
+        {{/each}}
+    {{/each}}
+    });
+
+    module.exports = moduleName;
+})(angular);
