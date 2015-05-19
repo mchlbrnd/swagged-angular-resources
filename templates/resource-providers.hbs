@@ -1,7 +1,7 @@
 (function(angular) {
   'use strict';
 
-  var moduleName = '{{angularModuleName}}';
+  var moduleName = '{{ngModule}}';
 
   angular
     .module(moduleName, [
@@ -17,7 +17,7 @@
       {{#if ../ngdoc}}
       /**
       * @ngdoc service
-      * @name {{../../angularModuleName}}.{{capitalize @key}}{{../angularProviderSuffix}}
+      * @name {{../../ngModule}}.{{capitalize @key}}{{../angularProviderSuffix}}
       * @requires $resource
       * @requires apiUrl
       **/
@@ -28,8 +28,8 @@
           {{#if ../../ngdoc}}
           /**
           * @ngdoc method
-          * @name {{../../../angularModuleName}}.{{capitalize @key}}{{../../../angularProviderSuffix}}.method:{{nickname}}
-          * @methodOf {{../../../angularModuleName}}.{{capitalize @key}}{{../../../angularProviderSuffix}}
+          * @name {{../../../ngModule}}.{{capitalize @key}}{{../../../angularProviderSuffix}}.method:{{nickname}}
+          * @methodOf {{../../../ngModule}}.{{capitalize @key}}{{../../../angularProviderSuffix}}
           * @description
           * {{summary}}
           **/
