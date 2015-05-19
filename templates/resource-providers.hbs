@@ -7,11 +7,31 @@
     .module(moduleName, [
       require('angular-resource')
     ])
-    {{#if stripTrailingSlashes}}
-    .config(function($resourceProvider) {
-      $resourceProvider.defaults.stripTrailingSlashes = false;
+    .provider('$resourceActionConfig', function () {
+      var actionConfigs = {$global: {}};
+
+      this.addActionConfig = function (resourceName, actionName, config) {
+        if (arguments.length === 1) {
+          actionConfigs.$global = resourceName; // resourceName === config
+          return this;
+        } else if (arguments.length === 2) {
+          config = actionName;
+          actionName = '$global';
+        }
+
+        actionConfigs[resourceName] = actionConfigs[resourceName] || {};
+        actionConfigs[resourceName][actionName] = config;
+        return this;
+      };
+
+      this.$get = function () {
+        return function (resourceName, actionName) {
+          return actionConfigs[resourceName]
+            ? (actionConfigs[resourceName][actionName] || actionConfigs[resourceName].$global)
+            : actionConfigs.$global;
+        };
+      };
     })
-    {{/if}}
     {{#each resourceOperations}}
     .{{../angularProviderType}}('{{capitalize @key}}{{../angularProviderSuffix}}', function() {
       {{#if ../ngdoc}}
@@ -22,7 +42,7 @@
       * @requires apiUrl
       **/
       {{/if}}
-      this.$get = function($resource, apiUrl) {
+      this.$get = function($resource, apiUrl, $resourceActionConfig) {
         return $resource(null, null, {
           {{#each this}}
           {{#if ../../ngdoc}}
@@ -34,7 +54,7 @@
           * {{summary}}
           **/
           {{/if}}
-          {{nickname}}: {
+          {{nickname}}: angular.extend({
             method: '{{action}}',
             url: apiUrl + '{{path}}',
             {{#if pathParameters}}
@@ -47,7 +67,7 @@
             {{#isQuery}}
             isArray: true,
             {{/isQuery}}
-          },
+          }, $resourceActionConfig('{{capitalize @key}}', '{{nickname}}')),
           {{/each}}
         });
       };
@@ -55,4 +75,4 @@
     {{/each}};
 
     module.exports = moduleName;
-})angular));
+}(angular));

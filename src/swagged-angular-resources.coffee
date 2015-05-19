@@ -17,7 +17,6 @@ mockTemplate = "#{__dirname}/../templates/httpBackend-mocks.hbs"
 fileOrUrl = argv._[0]
 ngModule = argv.ngModule || "swaggedAngularResources"
 ngModuleOutput = argv.output || "index.js"
-stripTrailingSlashes = !!argv.stripTrailingSlashes
 ngdoc = !!argv.ngdoc
 ngMockModuleOutput = argv.mock
 
@@ -94,7 +93,6 @@ getCode = (error, apiDefinition) ->
     ngModule: ngModule
     angularProviderType: "provider"
     angularProviderSuffix: ""
-    stripTrailingSlashes: stripTrailingSlashes
     resourceOperations: resourceOperations
     ngdoc: ngdoc
   }
