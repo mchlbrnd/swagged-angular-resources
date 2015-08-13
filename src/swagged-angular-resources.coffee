@@ -7,6 +7,7 @@ _ = require "underscore"
 _.str = require "underscore.string"
 handlebars = require "handlebars"
 argv = require("yargs").argv
+mkdirp = require 'mkdirp'
 
 if argv._.length == 0
   throw "Expected: swagged-angular-resources swagger-docs-url|swagger-docs-file [--ngmodule swaggedAngularResources [--strip-trailing-slashes false [--output index.js [--mock-output false]]]]"
@@ -103,6 +104,8 @@ getCode = (error, apiDefinition) ->
       throw error
     else
       code = handlebars.compile(template)(context)
+      mkdirp.sync ngModuleOutput if not fs.existsSync ngModuleOutput
+        
       fs.writeFile(ngModuleOutput, code, {encoding: "utf-8"}, (error) ->
         if error
           throw error
@@ -116,6 +119,7 @@ getCode = (error, apiDefinition) ->
       else
         log ngMockModuleOutput
         code = handlebars.compile(template)(context)
+        mkdirp.sync ngMockModuleOutput if not fs.existsSync ngMockModuleOutput
         fs.writeFile(ngMockModuleOutput, code, {encoding: "utf-8"}, (error) ->
           if error
             throw error
