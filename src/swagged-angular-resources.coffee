@@ -54,7 +54,7 @@ getResourceOperations = (apiDefinition) ->
 
       # TODO: add parameter for mimeType
       mockedResponseMimeType = "application/json"
-      mockedResponse = JSON.stringify(response.examples[mockedResponseMimeType], null, 4) if response.examples and response.examples[mockedResponseMimeType]
+      mockedResponse = JSON.stringify(response.examples[mockedResponseMimeType], null, 4) if response and response.examples and response.examples[mockedResponseMimeType]
 
       if modelDefinition
         modelDefinition = modelDefinition.match(/.+\/(.+)$/)[1]

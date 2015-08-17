@@ -46,13 +46,13 @@
           {{#if ../../ngdoc}}
           /**
           * @ngdoc method
-          * @name {{../../../ngModule}}.{{capitalize @key}}{{../../../angularProviderSuffix}}.method:{{nickname}}
+          * @name {{../../../ngModule}}.{{capitalize @key}}{{../../../angularProviderSuffix}}.method:{{camelize nickname}}
           * @methodOf {{../../../ngModule}}.{{capitalize @key}}{{../../../angularProviderSuffix}}
           * @description
           * {{summary}}
           **/
           {{/if}}
-          {{nickname}}: angular.extend({
+          '{{camelize nickname}}': angular.extend({
             method: '{{action}}',
             url: apiUrl + '{{path}}',
             {{#if pathParameters}}
@@ -65,7 +65,7 @@
             {{#isQuery}}
             isArray: true,
             {{/isQuery}}
-          }, $resourceActionConfig('{{capitalize @key}}', '{{nickname}}')),
+          }, $resourceActionConfig('{{@key}}', '{{camelize nickname}}')),
           {{/each}}
         });
       };
