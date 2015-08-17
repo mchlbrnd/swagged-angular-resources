@@ -4,9 +4,7 @@
   var moduleName = '{{ngModule}}';
 
   angular
-    .module(moduleName, [
-      require('angular-resource')
-    ])
+    .module(moduleName, ['ngResource'])
     .provider('$resourceActionConfig', function () {
       var actionConfigs = {$global: {}};
 
