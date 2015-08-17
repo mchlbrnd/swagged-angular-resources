@@ -3,19 +3,15 @@
 
     var moduleName = '{{angularModuleName}}.mocked';
 
-    require('angular-mocks');
-
     angular
-        .module(moduleName, [
-            'ngMockE2E'
-        ])
-    .run(function(apiUrl, $httpBackend) {
-    {{#each resourceOperations}}
-        {{#each this}}
-            $httpBackend.when{{action}}(apiUrl + '{{path}}').respond({{{mockedResponse}}});
+        .module(moduleName, ['ngMockE2E'])
+        .run(['apiUrl', '$httpBackend', function(apiUrl, $httpBackend) {
+        {{#each resourceOperations}}
+            {{#each this}}
+                $httpBackend.when{{action}}(apiUrl + '{{path}}').respond({{{mockedResponse}}});
+            {{/each}}
         {{/each}}
-    {{/each}}
-    });
+        }]);
 
     module.exports = moduleName;
 })(angular);
