@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 var _, apiUrlOrFile, argv, fileOrUrl, fs, getCode, getParameters, getResourceOperations, handlebars, log, mkdirp, mockTemplate, ngMockModuleOutput, ngModule, ngModuleOutput, ngdoc, path, providerTemplate, readFileAsJSON, readUrlAsJSON, registerHelpers, request, url;
 
 fs = require("fs");
