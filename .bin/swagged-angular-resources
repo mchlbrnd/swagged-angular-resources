@@ -1,135 +1,192 @@
-#!/usr/bin/env coffee
+var _, apiUrlOrFile, argv, fileOrUrl, fs, getCode, getParameters, getResourceOperations, handlebars, log, mkdirp, mockTemplate, ngMockModuleOutput, ngModule, ngModuleOutput, ngdoc, path, providerTemplate, readFileAsJSON, readUrlAsJSON, registerHelpers, request, url;
 
-fs = require "fs"
-request = require "request"
-path = require "path"
-url = require "url"
-_ = require "underscore"
-_.str = require "underscore.string"
-handlebars = require "handlebars"
-argv = require("yargs").argv
-mkdirp = require "mkdirp"
+fs = require("fs");
 
-if argv._.length == 0
-  throw "Expected: swagged-angular-resources swagger-docs-url|swagger-docs-file [--ngmodule swaggedAngularResources [--strip-trailing-slashes false [--output index.js [--mock-output false]]]]"
+request = require("request");
 
-providerTemplate = "#{__dirname}/../templates/resource-providers.hbs"
-mockTemplate = "#{__dirname}/../templates/httpBackend-mocks.hbs"
+path = require("path");
 
-fileOrUrl = argv._[0]
-ngModule = argv.ngModule || "swaggedAngularResources"
-ngModuleOutput = argv.output || "index.js"
-ngdoc = !!argv.ngdoc
-ngMockModuleOutput = argv.mock
+url = require("url");
 
-log = () -> console.log.apply this, arguments
+_ = require("underscore");
 
-registerHelpers = (fns) ->
-  candidateHelpers = _.filter(_.keys(fns), (fnName) -> _.isFunction fns[fnName])
-  _.each(candidateHelpers, (fnName) ->
-    handlebars.registerHelper(fnName, () ->
+_.str = require("underscore.string");
+
+handlebars = require("handlebars");
+
+argv = require("yargs").argv;
+
+mkdirp = require("mkdirp");
+
+if (argv._.length === 0) {
+  throw "Expected: swagged-angular-resources swagger-docs-url|swagger-docs-file [--ngmodule swaggedAngularResources [--strip-trailing-slashes false [--output index.js [--mock-output false]]]]";
+}
+
+providerTemplate = __dirname + "/../templates/resource-providers.hbs";
+
+mockTemplate = __dirname + "/../templates/httpBackend-mocks.hbs";
+
+fileOrUrl = argv._[0];
+
+ngModule = argv.ngModule || "swaggedAngularResources";
+
+ngModuleOutput = argv.output || "index.js";
+
+ngdoc = !!argv.ngdoc;
+
+ngMockModuleOutput = argv.mock;
+
+log = function() {
+  return console.log.apply(this, arguments);
+};
+
+registerHelpers = function(fns) {
+  var candidateHelpers;
+  candidateHelpers = _.filter(_.keys(fns), function(fnName) {
+    return _.isFunction(fns[fnName]);
+  });
+  return _.each(candidateHelpers, function(fnName) {
+    return handlebars.registerHelper(fnName, function() {
+      var args;
       args = Array.prototype.slice.call(arguments, 0).slice(0, -1);
-      fns[fnName].apply(this, args);
-    )
-  )
-registerHelpers(_.str)
+      return fns[fnName].apply(this, args);
+    });
+  });
+};
 
-readUrlAsJSON = (url, cb) -> request.get({url: url.href, json: true}, (error, res, result) -> cb(error, result))
-readFileAsJSON = (file, cb) -> fs.readFile(file, {encoding: "utf-8"}, (error, file) -> cb(error, JSON.parse(file)))
+registerHelpers(_.str);
 
-getParameters = (type, parameters) ->
-  params = _.filter(parameters, (parameter) -> parameter.in == type)
-  if params.length == 0 then false else params
+readUrlAsJSON = function(url, cb) {
+  return request.get({
+    url: url.href,
+    json: true
+  }, function(error, res, result) {
+    return cb(error, result);
+  });
+};
 
-getResourceOperations = (apiDefinition) ->
-  _.reduce(apiDefinition.paths, (memo, methods, path) ->
-    _.each(methods, (operation, action) ->
-      response = operation.responses["200"]
-      if response and response.schema
-        if response.schema.type == "array"
-          modelDefinition = response.schema.items.$ref;
-          isQuery = true
-        else
-          modelDefinition = response.schema.$ref
+readFileAsJSON = function(file, cb) {
+  return fs.readFile(file, {
+    encoding: "utf-8"
+  }, function(error, file) {
+    return cb(error, JSON.parse(file));
+  });
+};
 
-      # TODO: add parameter for mimeType
-      mockedResponseMimeType = "application/json"
-      mockedResponse = JSON.stringify(response.examples[mockedResponseMimeType], null, 4) if response.examples and response.examples[mockedResponseMimeType]
-
-      if modelDefinition
-        modelDefinition = modelDefinition.match(/.+\/(.+)$/)[1]
-        memo[modelDefinition] = memo[modelDefinition] || []
-
-        memo[modelDefinition].push({
-          path: path.replace(/\{(.+?)\}/g, ":$1")
-          nickname: operation.operationId || modelDefinition + "_" + _.str.capitalize(action)
-          action: action.toUpperCase()
-          summary: operation.summary
-
-          # mock example data
-          mockedResponse: mockedResponse
-
-          # build path parameters
-          pathParameters: getParameters("path", operation.parameters)
-
-          # get actions
-          isQuery: isQuery and action == "get"
-          isGet: !isQuery and action == "get"
-
-          # non-get actions
-          isDelete: action == "delete"
-          isPost: action == "post"
-          isPut: action == "put"
-          isPatch: action == "patch"
-        })
-    )
-    memo
-  , {})
-
-getCode = (error, apiDefinition) ->
-  throw error if error
-
-  resourceOperations = getResourceOperations(apiDefinition)
-
-  context = {
-    ngModule: ngModule
-    angularProviderType: "provider"
-    angularProviderSuffix: ""
-    resourceOperations: resourceOperations
-    ngdoc: ngdoc
+getParameters = function(type, parameters) {
+  var params;
+  params = _.filter(parameters, function(parameter) {
+    return parameter["in"] === type;
+  });
+  if (params.length === 0) {
+    return false;
+  } else {
+    return params;
   }
+};
 
-  # TODO encoding options and write readWrite function
-  fs.readFile(providerTemplate, {encoding: "utf-8"}, (error, template) ->
-    if error
-      throw error
-    else
-      code = handlebars.compile(template)(context)
-      mkdirp.sync path.dirname(ngModuleOutput) if not fs.existsSync ngModuleOutput
-        
-      fs.writeFile(ngModuleOutput, code, {encoding: "utf-8"}, (error) ->
-        if error
-          throw error
-      )
-  )
+getResourceOperations = function(apiDefinition) {
+  return _.reduce(apiDefinition.paths, function(memo, methods, path) {
+    _.each(methods, function(operation, action) {
+      var isQuery, mockedResponse, mockedResponseMimeType, modelDefinition, response;
+      response = operation.responses["200"];
+      if (response && response.schema) {
+        if (response.schema.type === "array") {
+          modelDefinition = response.schema.items.$ref;
+          isQuery = true;
+        } else {
+          modelDefinition = response.schema.$ref;
+        }
+      }
+      mockedResponseMimeType = "application/json";
+      if (response.examples && response.examples[mockedResponseMimeType]) {
+        mockedResponse = JSON.stringify(response.examples[mockedResponseMimeType], null, 4);
+      }
+      if (modelDefinition) {
+        modelDefinition = modelDefinition.match(/.+\/(.+)$/)[1];
+        memo[modelDefinition] = memo[modelDefinition] || [];
+        return memo[modelDefinition].push({
+          path: path.replace(/\{(.+?)\}/g, ":$1"),
+          nickname: operation.operationId || modelDefinition + "_" + _.str.capitalize(action),
+          action: action.toUpperCase(),
+          summary: operation.summary,
+          mockedResponse: mockedResponse,
+          pathParameters: getParameters("path", operation.parameters),
+          isQuery: isQuery && action === "get",
+          isGet: !isQuery && action === "get",
+          isDelete: action === "delete",
+          isPost: action === "post",
+          isPut: action === "put",
+          isPatch: action === "patch"
+        });
+      }
+    });
+    return memo;
+  }, {});
+};
 
-  if ngMockModuleOutput
-    fs.readFile(mockTemplate, {encoding: "utf-8"}, (error, template) ->
-      if error
-        throw error
-      else
-        log ngMockModuleOutput
-        code = handlebars.compile(template)(context)
-        mkdirp.sync path.dirname(ngMockModuleOutput) if not fs.existsSync ngMockModuleOutput
-        fs.writeFile(ngMockModuleOutput, code, {encoding: "utf-8"}, (error) ->
-          if error
-            throw error
-        )
-    )
+getCode = function(error, apiDefinition) {
+  var context, resourceOperations;
+  if (error) {
+    throw error;
+  }
+  resourceOperations = getResourceOperations(apiDefinition);
+  context = {
+    ngModule: ngModule,
+    angularProviderType: "provider",
+    angularProviderSuffix: "",
+    resourceOperations: resourceOperations,
+    ngdoc: ngdoc
+  };
+  fs.readFile(providerTemplate, {
+    encoding: "utf-8"
+  }, function(error, template) {
+    var code;
+    if (error) {
+      throw error;
+    } else {
+      code = handlebars.compile(template)(context);
+      if (!fs.existsSync(ngModuleOutput)) {
+        mkdirp.sync(path.dirname(ngModuleOutput));
+      }
+      return fs.writeFile(ngModuleOutput, code, {
+        encoding: "utf-8"
+      }, function(error) {
+        if (error) {
+          throw error;
+        }
+      });
+    }
+  });
+  if (ngMockModuleOutput) {
+    return fs.readFile(mockTemplate, {
+      encoding: "utf-8"
+    }, function(error, template) {
+      var code;
+      if (error) {
+        throw error;
+      } else {
+        log(ngMockModuleOutput);
+        code = handlebars.compile(template)(context);
+        if (!fs.existsSync(ngMockModuleOutput)) {
+          mkdirp.sync(path.dirname(ngMockModuleOutput));
+        }
+        return fs.writeFile(ngMockModuleOutput, code, {
+          encoding: "utf-8"
+        }, function(error) {
+          if (error) {
+            throw error;
+          }
+        });
+      }
+    });
+  }
+};
 
-apiUrlOrFile = url.parse fileOrUrl
+apiUrlOrFile = url.parse(fileOrUrl);
 
-if apiUrlOrFile.protocol != null
-  readUrlAsJSON apiUrlOrFile, getCode
-else
-  readFileAsJSON apiUrlOrFile.path, getCode
+if (apiUrlOrFile.protocol !== null) {
+  readUrlAsJSON(apiUrlOrFile, getCode);
+} else {
+  readFileAsJSON(apiUrlOrFile.path, getCode);
+}

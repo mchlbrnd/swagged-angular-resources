@@ -37,7 +37,8 @@
   "devDependencies": {
     "del": "^1.1.0",
     "gulp": "^3.8.10",
-    "gulp-rename": "^1.2.0"
+    "gulp-coffee": "^2.3.1",
+    "gulp-rename": "^1.2.0",
   },
   "dependencies": {
     "coffee-script": "^1.8.0",
