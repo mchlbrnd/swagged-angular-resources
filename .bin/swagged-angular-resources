@@ -67,9 +67,11 @@ readUrlAsJSON = function(url, cb) {
 };
 
 readFileAsJSON = function(file, cb) {
+  console.log(file);
   return fs.readFile(file, {
     encoding: "utf-8"
   }, function(error, file) {
+    console.log(error);
     console.log(file);
     return cb(error, JSON.parse(file));
   });
@@ -186,7 +188,7 @@ getCode = function(error, apiDefinition) {
 };
 
 apiUrlOrFile = url.parse(fileOrUrl);
-
+console.log('hallo');
 if (apiUrlOrFile.protocol !== null) {
   readUrlAsJSON(apiUrlOrFile, getCode);
 } else {
