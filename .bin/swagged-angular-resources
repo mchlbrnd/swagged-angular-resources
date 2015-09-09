@@ -70,6 +70,7 @@ readFileAsJSON = function(file, cb) {
   return fs.readFile(file, {
     encoding: "utf-8"
   }, function(error, file) {
+    console.log(file);
     return cb(error, JSON.parse(file));
   });
 };
