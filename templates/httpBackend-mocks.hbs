@@ -1,21 +1,22 @@
 (function(angular) {
     'use strict';
 
-    var moduleName = '{{angularModuleName}}.mocked';
-
-    require('angular-mocks');
+    var moduleName = '{{ngModule}}.mocked';
 
     angular
-        .module(moduleName, [
-            'ngMockE2E'
-        ])
-    .run(function(apiUrl, $httpBackend) {
-    {{#each resourceOperations}}
-        {{#each this}}
-            $httpBackend.when{{action}}(apiUrl + '{{path}}').respond({{{mockedResponse}}});
+        .module(moduleName, ['ngMockE2E'])
+        .run(['apiUrl', '$httpBackend', function(apiUrl, $httpBackend) {
+        {{#each resourceOperations}}
+            {{#each this}}
+                $httpBackend.when{{action}}(apiUrl + '{{path}}').respond({{{mockedResponse}}});
+            {{/each}}
         {{/each}}
-    {{/each}}
-    });
+        }]);
 
-    module.exports = moduleName;
+    if( typeof exports !== 'undefined' ) {
+        if (typeof module !== 'undefined' && module.exports) {
+            exports = module.exports = moduleName;
+        }
+        exports = moduleName;
+    }
 })(angular);
