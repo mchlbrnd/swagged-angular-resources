@@ -118,7 +118,6 @@ getCode = (error, apiDefinition) ->
       if error
         throw error
       else
-        log ngMockModuleOutput
         code = handlebars.compile(template)(context)
         mkdirp.sync path.dirname(ngMockModuleOutput) if not fs.existsSync ngMockModuleOutput
         fs.writeFile(ngMockModuleOutput, code, {encoding: "utf-8"}, (error) ->

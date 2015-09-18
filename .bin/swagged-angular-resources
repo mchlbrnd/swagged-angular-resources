@@ -67,12 +67,9 @@ readUrlAsJSON = function(url, cb) {
 };
 
 readFileAsJSON = function(file, cb) {
-  console.log(file);
   return fs.readFile(file, {
     encoding: "utf-8"
   }, function(error, file) {
-    console.log(error);
-    console.log(file);
     return cb(error, JSON.parse(file));
   });
 };
@@ -103,7 +100,7 @@ getResourceOperations = function(apiDefinition) {
         }
       }
       mockedResponseMimeType = "application/json";
-      if (response.examples && response.examples[mockedResponseMimeType]) {
+      if (response && response.examples && response.examples[mockedResponseMimeType]) {
         mockedResponse = JSON.stringify(response.examples[mockedResponseMimeType], null, 4);
       }
       if (modelDefinition) {
@@ -170,7 +167,6 @@ getCode = function(error, apiDefinition) {
       if (error) {
         throw error;
       } else {
-        log(ngMockModuleOutput);
         code = handlebars.compile(template)(context);
         if (!fs.existsSync(ngMockModuleOutput)) {
           mkdirp.sync(path.dirname(ngMockModuleOutput));
@@ -188,7 +184,7 @@ getCode = function(error, apiDefinition) {
 };
 
 apiUrlOrFile = url.parse(fileOrUrl);
-console.log('hallo');
+
 if (apiUrlOrFile.protocol !== null) {
   readUrlAsJSON(apiUrlOrFile, getCode);
 } else {
