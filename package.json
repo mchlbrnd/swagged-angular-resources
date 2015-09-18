@@ -1,6 +1,6 @@
 {
   "name": "swagged-angular-resources",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "AngularJS $resource code generator written in CoffeeScript for Swagger v2.0 documentated endpoints.",
   "main": ".bin/swagged-angular-resources",
   "bin": {
@@ -35,14 +35,15 @@
     "url": "git@github.com:mchlbrnd/swagged-angular-resources.git"
   },
   "devDependencies": {
+    "coffee-script": "^1.8.0",
     "del": "^1.1.0",
     "gulp": "^3.8.10",
     "gulp-coffee": "^2.3.1",
     "gulp-header": "^1.7.1",
-    "gulp-rename": "^1.2.0"
+    "gulp-rename": "^1.2.0",
+    "gulp-util": "^3.0.6"
   },
   "dependencies": {
-    "coffee-script": "^1.8.0",
     "handlebars": "^2.0.0",
     "mkdirp": "^0.5.1",
     "request": "^2.49.0",
