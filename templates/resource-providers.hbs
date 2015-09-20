@@ -1,76 +1,119 @@
-(function(angular) {
-  'use strict';
+(function(angular, undefined) {
+    'use strict';
 
-  var moduleName = '{{ngModule}}';
+    var moduleName = '{{ngModule}}';
+    var merge = angular.merge;
+    var isFunction = angular.isFunction;
+    var isObject = angular.isObject;
+    var keys = Object.keys;
 
-  angular
-    .module(moduleName, ['ngResource'])
-    .provider('$resourceActionConfig', function () {
-      var actionConfigs = {$global: {}};
+    var mod = angular.module(moduleName, ['ngResource'])
 
-      this.addActionConfig = function (resourceName, actionName, config) {
-        if (arguments.length === 1) {
-          actionConfigs.$global = resourceName; // resourceName === config
-          return this;
-        } else if (arguments.length === 2) {
-          config = actionName;
-          actionName = '$global';
+    mod.provider('$resourceConfig', function ($provide, $injector) {
+        var self = this;
+
+        function invokeActions () {
+            var args = Array.prototype.slice.call(arguments);
+
+            return args.map(function (arg) {
+                if (isObject(arg)) {
+                    return keys(arg).reduce(function (memo, key) {
+                        var value = arg[key];
+                        memo[key] = isFunction(value) ? $injector.invoke(value) : value;
+                        return memo;
+                    }, {});
+                } else if (isFunction(arg)) {
+                    return $injector.invoke(arg);
+                }
+            });
         }
 
-        actionConfigs[resourceName] = actionConfigs[resourceName] || {};
-        actionConfigs[resourceName][actionName] = config;
-        return this;
-      };
-
-      this.$get = function () {
-        return function (resourceName, actionName) {
-          return actionConfigs[resourceName]
-            ? (actionConfigs[resourceName][actionName] || actionConfigs[resourceName].$global)
-            : actionConfigs.$global;
+        this.config = function () {
+            var actions = invokeActions.apply(null, arguments);
+            actions.unshift(this.$$actions);
+            merge.apply(null, actions);
+            return self;
         };
-      };
-    })
-    {{#each resourceOperations}}
-    .{{../angularProviderType}}('{{capitalize @key}}{{../angularProviderSuffix}}', function() {
-      {{#if ../ngdoc}}
-      /**
-      * @ngdoc service
-      * @name {{../../ngModule}}.{{capitalize @key}}{{../angularProviderSuffix}}
-      * @requires $resource
-      * @requires apiUrl
-      **/
-      {{/if}}
-      this.$get = function($resource, apiUrl, $resourceActionConfig) {
-        return $resource(null, null, {
-          {{#each this}}
-          {{#if ../../ngdoc}}
-          /**
-          * @ngdoc method
-          * @name {{../../../ngModule}}.{{capitalize @key}}{{../../../angularProviderSuffix}}.method:{{camelize nickname}}
-          * @methodOf {{../../../ngModule}}.{{capitalize @key}}{{../../../angularProviderSuffix}}
-          * @description
-          * {{summary}}
-          **/
-          {{/if}}
-          '{{camelize nickname}}': angular.extend({
-            method: '{{action}}',
-            url: apiUrl + '{{path}}',
-            {{#if pathParameters}}
-            params: {
-              {{#each pathParameters}}
-              '{{name}}': '@{{name}}',
-              {{/each}}
-            },
-            {{/if}}
-            {{#isQuery}}
-            isArray: true,
-            {{/isQuery}}
-          }, $resourceActionConfig('{{@key}}', '{{camelize nickname}}')),
-          {{/each}}
+
+        $provide.decorator('$resource', function ($delegate) {
+            return function (url, paramDefaults, actions, options) {
+                var resource;
+
+                function configure (actions) {
+                    actions = invokeActions(actions);
+                    actions.unshift({}, resource && resource.$$actions || {});
+                    actions = merge.apply(null, actions);
+
+                    resource = $delegate(url, paramDefaults, actions, options);
+
+                    resource.$config = configure;
+                    resource.$$actions = actions;
+
+                    return resource;
+                }
+
+                var nArgs = arguments.length;
+                if (isObject(url)) {
+                    if (nArgs === 1) {
+                        actions = url;
+                        url = null;
+                        return configure(actions);
+                    } else if (isObject(paramDefaults) && nArgs === 2) {
+                        actions = paramDefaults;
+                        paramDefaults = url;
+                        return configure(actions);
+                    }
+                }
+
+                return $delegate.apply(null, arguments);
+            };
         });
-      };
-    })
-    {{/each}};
+
+        this.$get = angular.noop;
+    });
+
+    {{#each resourceOperations}}
+    mod.{{../angularProviderType}}('{{capitalize @key}}{{../angularProviderSuffix}}', function ($injector, $resourceConfigProvider) {
+        var self = this;
+
+        this.$$actions = {};
+
+        this.config = $resourceConfigProvider.config.bind(this);
+
+        {{#if ../ngdoc}}
+        /**
+        * @ngdoc service
+        * @name {{../../ngModule}}.{{capitalize @key}}{{../angularProviderSuffix}}
+        * @requires $resource
+        * @requires apiUrl
+        **/
+        {{/if}}
+        this.$get = function($injector, $resourceConfig, $resource, apiUrl) {
+            var actions = {
+                {{#each this}}
+                '{{camelize nickname}}': {
+                    method: '{{action}}',
+                    url: apiUrl + '{{path}}',
+                    {{#if pathParameters}}
+                    params: {
+                        {{#each pathParameters}}
+                        '{{name}}': '@{{name}}',
+                        {{/each}}
+                    },
+                    {{/if}}
+                    {{#isQuery}}
+                    isArray: true,
+                    {{/isQuery}}
+                },
+                {{/each}}
+            };
+
+            actions = merge({}, actions, self.$$actions);
+            return $resource(actions);
+        };
+    });
+
+    {{/each}}
 
     if (typeof exports !== 'undefined') {
         if (typeof module !== 'undefined' && module.exports) {
