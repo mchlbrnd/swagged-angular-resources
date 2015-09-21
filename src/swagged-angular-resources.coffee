@@ -42,25 +42,36 @@ getParameters = (type, parameters) ->
   if params.length == 0 then false else params
 
 getResourceOperations = (apiDefinition) ->
-  _.reduce(apiDefinition.paths, (memo, methods, path) ->
-    _.each(methods, (operation, action) ->
-      response = operation.responses["200"]
-      if response and response.schema
-        if response.schema.type == "array"
-          modelDefinition = response.schema.items.$ref;
-          isQuery = true
-        else
-          modelDefinition = response.schema.$ref
+  if apiDefinition.tags
+    tags = _.map apiDefinition.tags, (tag) -> tag.name
+  else
+    tags = _.reduce apiDefinition.paths, (memo, methods) ->
+      _.each methods, (operation) ->
+        memo = memo.concat(operation.tags)
+      memo
+    , []
+    tags = _.uniq tags
 
-      # TODO: add parameter for mimeType
-      mockedResponseMimeType = "application/json"
-      mockedResponse = JSON.stringify(response.examples[mockedResponseMimeType], null, 4) if response and response.examples and response.examples[mockedResponseMimeType]
+  _.reduce apiDefinition.paths, (memo, methods, path) ->
+    _.each methods, (operation, action) ->
+      inTags = _.intersection operation.tags, tags
 
-      if modelDefinition
-        modelDefinition = modelDefinition.match(/.+\/(.+)$/)[1]
-        memo[modelDefinition] = memo[modelDefinition] || []
+      _.each inTags, (tag) ->
+        response = operation.responses["200"]
+        if response and response.schema
+          if response.schema.type == "array"
+            modelDefinition = response.schema.items.$ref;
+            isQuery = true
+          else
+            modelDefinition = response.schema.$ref
 
-        memo[modelDefinition].push({
+        # TODO: add parameter for mimeType
+        mockedResponseMimeType = "application/json"
+        mockedResponse = JSON.stringify(response.examples[mockedResponseMimeType], null, 4) if response and response.examples and response.examples[mockedResponseMimeType]
+
+        modelDefinition = modelDefinition and modelDefinition.match(/.+\/(.+)$/)[1]
+        memo[tag] = memo[tag] or []
+        memo[tag].push {
           path: path.replace(/\{(.+?)\}/g, ":$1")
           nickname: operation.operationId || modelDefinition + "_" + _.str.capitalize(action)
           action: action.toUpperCase()
@@ -81,10 +92,9 @@ getResourceOperations = (apiDefinition) ->
           isPost: action == "post"
           isPut: action == "put"
           isPatch: action == "patch"
-        })
-    )
+        }
     memo
-  , {})
+  , {}
 
 getCode = (error, apiDefinition) ->
   throw error if error
