@@ -87,26 +87,42 @@ getParameters = function(type, parameters) {
 };
 
 getResourceOperations = function(apiDefinition) {
+  var tags;
+  if (apiDefinition.tags) {
+    tags = _.map(apiDefinition.tags, function(tag) {
+      return tag.name;
+    });
+  } else {
+    tags = _.reduce(apiDefinition.paths, function(memo, methods) {
+      _.each(methods, function(operation) {
+        return memo = memo.concat(operation.tags);
+      });
+      return memo;
+    }, []);
+    tags = _.uniq(tags);
+  }
   return _.reduce(apiDefinition.paths, function(memo, methods, path) {
     _.each(methods, function(operation, action) {
-      var isQuery, mockedResponse, mockedResponseMimeType, modelDefinition, response;
-      response = operation.responses["200"];
-      if (response && response.schema) {
-        if (response.schema.type === "array") {
-          modelDefinition = response.schema.items.$ref;
-          isQuery = true;
-        } else {
-          modelDefinition = response.schema.$ref;
+      var inTags;
+      inTags = _.intersection(operation.tags, tags);
+      return _.each(inTags, function(tag) {
+        var isQuery, mockedResponse, mockedResponseMimeType, modelDefinition, response;
+        response = operation.responses["200"];
+        if (response && response.schema) {
+          if (response.schema.type === "array") {
+            modelDefinition = response.schema.items.$ref;
+            isQuery = true;
+          } else {
+            modelDefinition = response.schema.$ref;
+          }
         }
-      }
-      mockedResponseMimeType = "application/json";
-      if (response && response.examples && response.examples[mockedResponseMimeType]) {
-        mockedResponse = JSON.stringify(response.examples[mockedResponseMimeType], null, 4);
-      }
-      if (modelDefinition) {
-        modelDefinition = modelDefinition.match(/.+\/(.+)$/)[1];
-        memo[modelDefinition] = memo[modelDefinition] || [];
-        return memo[modelDefinition].push({
+        mockedResponseMimeType = "application/json";
+        if (response && response.examples && response.examples[mockedResponseMimeType]) {
+          mockedResponse = JSON.stringify(response.examples[mockedResponseMimeType], null, 4);
+        }
+        modelDefinition = modelDefinition && modelDefinition.match(/.+\/(.+)$/)[1];
+        memo[tag] = memo[tag] || [];
+        return memo[tag].push({
           path: path.replace(/\{(.+?)\}/g, ":$1"),
           nickname: operation.operationId || modelDefinition + "_" + _.str.capitalize(action),
           action: action.toUpperCase(),
@@ -120,7 +136,7 @@ getResourceOperations = function(apiDefinition) {
           isPut: action === "put",
           isPatch: action === "patch"
         });
-      }
+      });
     });
     return memo;
   }, {});
