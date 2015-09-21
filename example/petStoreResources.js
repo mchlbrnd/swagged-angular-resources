@@ -1,4 +1,4 @@
-(function(angular, undefined) {
+(function (angular, undefined) {
     'use strict';
 
     var moduleName = 'petStoreResources';
@@ -12,7 +12,7 @@
     mod.provider('$resourceConfig', function ($provide, $injector) {
         var self = this;
 
-        function invokeActions () {
+        function invokeActions() {
             var args = Array.prototype.slice.call(arguments);
 
             return args.map(function (arg) {
@@ -39,7 +39,7 @@
             return function (url, paramDefaults, actions, options) {
                 var resource;
 
-                function configure (actions) {
+                function configure(actions) {
                     actions = invokeActions(actions);
                     actions.unshift({}, resource && resource.$$actions || {});
                     actions = merge.apply(null, actions);
@@ -79,8 +79,16 @@
 
         this.config = $resourceConfigProvider.config.bind(this);
 
-        this.$get = function($injector, $resourceConfig, $resource, apiUrl) {
+        this.$get = function ($injector, $resourceConfig, $resource, apiUrl) {
             var actions = {
+                'addPet': {
+                    method: 'POST',
+                    url: apiUrl + '/pet',
+                },
+                'updatePet': {
+                    method: 'PUT',
+                    url: apiUrl + '/pet',
+                },
                 'findPetsByStatus': {
                     method: 'GET',
                     url: apiUrl + '/pet/findByStatus',
@@ -98,22 +106,20 @@
                         'petId': '@petId',
                     },
                 },
-            };
-
-            actions = merge({}, actions, self.$$actions);
-            return $resource(actions);
-        };
-    });
-
-    mod.provider('ApiResponse', function ($injector, $resourceConfigProvider) {
-        var self = this;
-
-        this.$$actions = {};
-
-        this.config = $resourceConfigProvider.config.bind(this);
-
-        this.$get = function($injector, $resourceConfig, $resource, apiUrl) {
-            var actions = {
+                'updatePetWithForm': {
+                    method: 'POST',
+                    url: apiUrl + '/pet/:petId',
+                    params: {
+                        'petId': '@petId',
+                    },
+                },
+                'deletePet': {
+                    method: 'DELETE',
+                    url: apiUrl + '/pet/:petId',
+                    params: {
+                        'petId': '@petId',
+                    },
+                },
                 'uploadFile': {
                     method: 'POST',
                     url: apiUrl + '/pet/:petId/uploadImage',
@@ -128,21 +134,32 @@
         };
     });
 
-    mod.provider('Order', function ($injector, $resourceConfigProvider) {
+    mod.provider('Store', function ($injector, $resourceConfigProvider) {
         var self = this;
 
         this.$$actions = {};
 
         this.config = $resourceConfigProvider.config.bind(this);
 
-        this.$get = function($injector, $resourceConfig, $resource, apiUrl) {
+        this.$get = function ($injector, $resourceConfig, $resource, apiUrl) {
             var actions = {
+                'getInventory': {
+                    method: 'GET',
+                    url: apiUrl + '/store/inventory',
+                },
                 'placeOrder': {
                     method: 'POST',
                     url: apiUrl + '/store/order',
                 },
                 'getOrderById': {
                     method: 'GET',
+                    url: apiUrl + '/store/order/:orderId',
+                    params: {
+                        'orderId': '@orderId',
+                    },
+                },
+                'deleteOrder': {
+                    method: 'DELETE',
                     url: apiUrl + '/store/order/:orderId',
                     params: {
                         'orderId': '@orderId',
@@ -162,10 +179,44 @@
 
         this.config = $resourceConfigProvider.config.bind(this);
 
-        this.$get = function($injector, $resourceConfig, $resource, apiUrl) {
+        this.$get = function ($injector, $resourceConfig, $resource, apiUrl) {
             var actions = {
+                'createUser': {
+                    method: 'POST',
+                    url: apiUrl + '/user',
+                },
+                'createUsersWithArrayInput': {
+                    method: 'POST',
+                    url: apiUrl + '/user/createWithArray',
+                },
+                'createUsersWithListInput': {
+                    method: 'POST',
+                    url: apiUrl + '/user/createWithList',
+                },
+                'loginUser': {
+                    method: 'GET',
+                    url: apiUrl + '/user/login',
+                },
+                'logoutUser': {
+                    method: 'GET',
+                    url: apiUrl + '/user/logout',
+                },
                 'getUserByName': {
                     method: 'GET',
+                    url: apiUrl + '/user/:username',
+                    params: {
+                        'username': '@username',
+                    },
+                },
+                'updateUser': {
+                    method: 'PUT',
+                    url: apiUrl + '/user/:username',
+                    params: {
+                        'username': '@username',
+                    },
+                },
+                'deleteUser': {
+                    method: 'DELETE',
                     url: apiUrl + '/user/:username',
                     params: {
                         'username': '@username',
