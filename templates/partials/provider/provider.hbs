@@ -1,0 +1,12 @@
+{{> providerDoc}}
+function {{capitalize @key}}{{@root/ngProviderSuffix}} ($resourceConfigProvider) {
+    var self = this;
+    this.$$actions = {};
+    this.config = $resourceConfigProvider.config.bind(this);
+
+    this.$get = function($resource, apiUrl) {
+        var actions = {{> providerActions}};
+        actions = merge({}, actions, self.$$actions);
+        return $resource(actions);
+    };
+}

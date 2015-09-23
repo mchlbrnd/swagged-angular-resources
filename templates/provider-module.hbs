@@ -1,5 +1,4 @@
-(function(angular, undefined) {
-    'use strict';
+{{> header}}
 
     var moduleName = '{{ngModule}}';
     var merge = angular.merge;
@@ -7,7 +6,7 @@
     var isObject = angular.isObject;
     var keys = Object.keys;
 
-    var mod = angular.module(moduleName, ['ngResource'])
+    var mod = angular.module(moduleName, ['ngResource']);
 
     mod.provider('$resourceConfig', function ($provide, $injector) {
         var self = this;
@@ -72,53 +71,11 @@
         this.$get = angular.noop;
     });
 
-    {{#each resourceOperations}}
-    mod.{{../angularProviderType}}('{{capitalize @key}}{{../angularProviderSuffix}}', function ($injector, $resourceConfigProvider) {
-        var self = this;
+    {{#each ngResources}}
+    {{> provider}}
 
-        this.$$actions = {};
-
-        this.config = $resourceConfigProvider.config.bind(this);
-
-        {{#if ../ngdoc}}
-        /**
-        * @ngdoc service
-        * @name {{../../ngModule}}.{{capitalize @key}}{{../angularProviderSuffix}}
-        * @requires $resource
-        * @requires apiUrl
-        **/
-        {{/if}}
-        this.$get = function($injector, $resourceConfig, $resource, apiUrl) {
-            var actions = {
-                {{#each this}}
-                '{{camelize nickname}}': {
-                    method: '{{action}}',
-                    url: apiUrl + '{{path}}',
-                    {{#if pathParameters}}
-                    params: {
-                        {{#each pathParameters}}
-                        '{{name}}': '@{{name}}',
-                        {{/each}}
-                    },
-                    {{/if}}
-                    {{#isQuery}}
-                    isArray: true,
-                    {{/isQuery}}
-                },
-                {{/each}}
-            };
-
-            actions = merge({}, actions, self.$$actions);
-            return $resource(actions);
-        };
-    });
+    mod.provider('{{capitalize @key}}{{@root/ngProviderSuffix}}', {{capitalize @key}}{{@root/ngProviderSuffix}});
 
     {{/each}}
 
-    if (typeof exports !== 'undefined') {
-        if (typeof module !== 'undefined' && module.exports) {
-            exports = module.exports = moduleName;
-        }
-        exports = moduleName;
-    }
-}(angular));
+{{> footer}}
