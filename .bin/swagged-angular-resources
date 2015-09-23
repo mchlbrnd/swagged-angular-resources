@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var _, apiUrlOrFile, argv, fileOrUrl, fs, getCode, getParameters, getResourceOperations, handlebars, log, mkdirp, mockTemplate, ngMockModuleOutput, ngModule, ngModuleOutput, ngdoc, path, providerTemplate, readFileAsJSON, readUrlAsJSON, registerHelpers, request, url;
+var _, apiUrlOrFile, argv, fileOrUrl, fs, getCode, getParameters, getResourceOperations, handlebars, log, mkdirp, mockTemplate, ngDoc, ngMockModuleOutput, ngModule, ngModuleOutput, path, providerTemplate, readFileAsJSON, readUrlAsJSON, registerHelpers, registerPartialFromFile, request, templateBase, url;
 
 fs = require("fs");
 
@@ -23,17 +23,13 @@ if (argv._.length === 0) {
   throw "Expected: swagged-angular-resources swagger-docs-url|swagger-docs-file [--ngmodule swaggedAngularResources [--strip-trailing-slashes false [--output index.js [--mock-output false]]]]";
 }
 
-providerTemplate = __dirname + "/../templates/resource-providers.hbs";
-
-mockTemplate = __dirname + "/../templates/httpBackend-mocks.hbs";
-
 fileOrUrl = argv._[0];
 
 ngModule = argv.ngModule || "swaggedAngularResources";
 
 ngModuleOutput = argv.output || "index.js";
 
-ngdoc = !!argv.ngdoc;
+ngDoc = !!argv.ngdoc;
 
 ngMockModuleOutput = argv.mock;
 
@@ -56,6 +52,34 @@ registerHelpers = function(fns) {
 };
 
 registerHelpers(_.str);
+
+registerPartialFromFile = function(name, path) {
+  var content;
+  content = fs.readFileSync(path, {
+    encoding: "utf-8"
+  });
+  return handlebars.registerPartial(name, content);
+};
+
+templateBase = __dirname + "/../templates";
+
+providerTemplate = templateBase + "/provider-module.hbs";
+
+mockTemplate = templateBase + "/mock-module.hbs";
+
+registerPartialFromFile("header", templateBase + "/partials/layout/header.hbs");
+
+registerPartialFromFile("footer", templateBase + "/partials/layout/footer.hbs");
+
+registerPartialFromFile("provider", templateBase + "/partials/provider/provider.hbs");
+
+registerPartialFromFile("providerDoc", templateBase + "/partials/provider/provider-doc.hbs");
+
+registerPartialFromFile("providerActions", templateBase + "/partials/provider/actions.hbs");
+
+registerPartialFromFile("providerActionsDoc", templateBase + "/partials/provider/actions-doc.hbs");
+
+registerPartialFromFile("mockActions", templateBase + "/partials/mock/actions.hbs");
 
 readUrlAsJSON = function(url, cb) {
   return request.get({
@@ -150,10 +174,9 @@ getCode = function(error, apiDefinition) {
   resourceOperations = getResourceOperations(apiDefinition);
   context = {
     ngModule: ngModule,
-    angularProviderType: "provider",
-    angularProviderSuffix: "",
-    resourceOperations: resourceOperations,
-    ngdoc: ngdoc
+    ngProviderSuffix: "",
+    ngResources: resourceOperations,
+    ngDoc: ngDoc
   };
   fs.readFile(providerTemplate, {
     encoding: "utf-8"
