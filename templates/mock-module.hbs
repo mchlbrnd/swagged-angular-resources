@@ -1,0 +1,11 @@
+{{> header}}
+
+    var moduleName = '{{ngModule}}.mocked';
+
+    var mod = angular.module(moduleName, ['ngMockE2E']);
+
+    mod.run(['apiUrl', '$httpBackend', function(apiUrl, $httpBackend) {
+    {{> mockActions}}
+    }]);
+
+{{> footer}}

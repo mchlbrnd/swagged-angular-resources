@@ -1,0 +1,9 @@
+{{#if @root/ngDoc}}
+/**
+ * @ngdoc service
+ * @name {{@root/ngModule}}.{{capitalize @key}}{{@root/ngProviderSuffix}}
+{{#each requires}}
+ * @requires {{this}}
+{{/each}}
+ **/
+{{/if}}

@@ -13,13 +13,10 @@ mkdirp = require "mkdirp"
 if argv._.length == 0
   throw "Expected: swagged-angular-resources swagger-docs-url|swagger-docs-file [--ngmodule swaggedAngularResources [--strip-trailing-slashes false [--output index.js [--mock-output false]]]]"
 
-providerTemplate = "#{__dirname}/../templates/resource-providers.hbs"
-mockTemplate = "#{__dirname}/../templates/httpBackend-mocks.hbs"
-
 fileOrUrl = argv._[0]
 ngModule = argv.ngModule || "swaggedAngularResources"
 ngModuleOutput = argv.output || "index.js"
-ngdoc = !!argv.ngdoc
+ngDoc = !!argv.ngdoc
 ngMockModuleOutput = argv.mock
 
 log = () -> console.log.apply this, arguments
@@ -33,6 +30,21 @@ registerHelpers = (fns) ->
     )
   )
 registerHelpers(_.str)
+
+registerPartialFromFile = (name, path) ->
+  content = fs.readFileSync(path, {encoding: "utf-8"})
+  handlebars.registerPartial(name, content)
+
+templateBase = "#{__dirname}/../templates"
+providerTemplate = "#{templateBase}/provider-module.hbs"
+mockTemplate = "#{templateBase}/mock-module.hbs"
+registerPartialFromFile("header", "#{templateBase}/partials/layout/header.hbs")
+registerPartialFromFile("footer", "#{templateBase}/partials/layout/footer.hbs")
+registerPartialFromFile("provider", "#{templateBase}/partials/provider/provider.hbs")
+registerPartialFromFile("providerDoc", "#{templateBase}/partials/provider/provider-doc.hbs")
+registerPartialFromFile("providerActions", "#{templateBase}/partials/provider/actions.hbs")
+registerPartialFromFile("providerActionsDoc", "#{templateBase}/partials/provider/actions-doc.hbs")
+registerPartialFromFile("mockActions", "#{templateBase}/partials/mock/actions.hbs")
 
 readUrlAsJSON = (url, cb) -> request.get({url: url.href, json: true}, (error, res, result) -> cb(error, result))
 readFileAsJSON = (file, cb) -> fs.readFile(file, {encoding: "utf-8"}, (error, file) -> cb(error, JSON.parse(file)))
@@ -103,10 +115,9 @@ getCode = (error, apiDefinition) ->
 
   context = {
     ngModule: ngModule
-    angularProviderType: "provider"
-    angularProviderSuffix: ""
-    resourceOperations: resourceOperations
-    ngdoc: ngdoc
+    ngProviderSuffix: ""
+    ngResources: resourceOperations
+    ngDoc: ngDoc
   }
 
   # TODO encoding options and write readWrite function
