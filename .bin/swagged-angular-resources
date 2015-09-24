@@ -53,6 +53,10 @@ registerHelpers = function(fns) {
 
 registerHelpers(_.str);
 
+handlebars.registerHelper('json', function(context) {
+  return JSON.stringify(context, null, 4);
+});
+
 registerPartialFromFile = function(name, path) {
   var content;
   content = fs.readFileSync(path, {
@@ -80,6 +84,10 @@ registerPartialFromFile("providerActions", templateBase + "/partials/provider/ac
 registerPartialFromFile("providerActionsDoc", templateBase + "/partials/provider/actions-doc.hbs");
 
 registerPartialFromFile("mockActions", templateBase + "/partials/mock/actions.hbs");
+
+registerPartialFromFile("swaggerConfiguration", templateBase + "/partials/config/configuration.hbs");
+
+registerPartialFromFile("swaggerInformation", templateBase + "/partials/config/information.hbs");
 
 readUrlAsJSON = function(url, cb) {
   return request.get({
@@ -142,7 +150,7 @@ getResourceOperations = function(apiDefinition) {
         }
         mockedResponseMimeType = "application/json";
         if (response && response.examples && response.examples[mockedResponseMimeType]) {
-          mockedResponse = JSON.stringify(response.examples[mockedResponseMimeType], null, 4);
+          mockedResponse = response.examples[mockedResponseMimeType];
         }
         modelDefinition = modelDefinition && modelDefinition.match(/.+\/(.+)$/)[1];
         memo[tag] = memo[tag] || [];
@@ -173,6 +181,8 @@ getCode = function(error, apiDefinition) {
   }
   resourceOperations = getResourceOperations(apiDefinition);
   context = {
+    swaggerApiUrl: (_.first(apiDefinition.schemes)) + "://" + apiDefinition.host + apiDefinition.basePath,
+    swaggerApiInfo: apiDefinition.info,
     ngModule: ngModule,
     ngProviderSuffix: "",
     ngResources: resourceOperations,

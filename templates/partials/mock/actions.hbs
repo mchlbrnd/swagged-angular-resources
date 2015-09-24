@@ -1,5 +1,5 @@
 {{#each ngResources}}
     {{#each this}}
-    $httpBackend.when{{action}}(apiUrl + '{{path}}').respond({{{mockedResponse}}});
+    $httpBackend.when{{action}}(apiUrl + '{{path}}').respond({{{json mockedResponse}}});
     {{/each}}
 {{/each}}
