@@ -30,7 +30,8 @@ registerHelpers = (fns) ->
       fns[fnName].apply(this, args);
     )
   )
-registerHelpers(_.str)
+registerHelpers _.str
+handlebars.registerHelper 'json', (context) -> JSON.stringify context, null, 4
 
 registerPartialFromFile = (name, path) ->
   content = fs.readFileSync(path, {encoding: "utf-8"})
@@ -46,6 +47,8 @@ registerPartialFromFile("providerDoc", "#{templateBase}/partials/provider/provid
 registerPartialFromFile("providerActions", "#{templateBase}/partials/provider/actions.hbs")
 registerPartialFromFile("providerActionsDoc", "#{templateBase}/partials/provider/actions-doc.hbs")
 registerPartialFromFile("mockActions", "#{templateBase}/partials/mock/actions.hbs")
+registerPartialFromFile("swaggerConfiguration", "#{templateBase}/partials/config/configuration.hbs")
+registerPartialFromFile("swaggerInformation", "#{templateBase}/partials/config/information.hbs")
 
 readUrlAsJSON = (url, cb) -> request.get({url: url.href, json: true}, (error, res, result) -> cb(error, result))
 readFileAsJSON = (file, cb) -> fs.readFile(file, {encoding: "utf-8"}, (error, file) -> cb(error, JSON.parse(file)))
@@ -80,7 +83,7 @@ getResourceOperations = (apiDefinition) ->
 
         # TODO: add parameter for mimeType
         mockedResponseMimeType = "application/json"
-        mockedResponse = JSON.stringify(response.examples[mockedResponseMimeType], null, 4) if response and response.examples and response.examples[mockedResponseMimeType]
+        mockedResponse = response.examples[mockedResponseMimeType] if response and response.examples and response.examples[mockedResponseMimeType]
 
         modelDefinition = modelDefinition and modelDefinition.match(/.+\/(.+)$/)[1]
         memo[tag] = memo[tag] or []
@@ -115,6 +118,8 @@ getCode = (error, apiDefinition) ->
   resourceOperations = getResourceOperations(apiDefinition)
 
   context = {
+    swaggerApiUrl: "#{_.first(apiDefinition.schemes)}://#{apiDefinition.host}#{apiDefinition.basePath}"
+    swaggerApiInfo: apiDefinition.info
     ngModule: ngModule
     ngProviderSuffix: ""
     ngResources: resourceOperations

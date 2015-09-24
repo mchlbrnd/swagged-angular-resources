@@ -8,6 +8,10 @@
 
     var mod = angular.module(moduleName, ['ngResource']);
 
+    {{> swaggerConfiguration}}
+
+    {{> swaggerInformation}}
+
     mod.provider('$resourceConfig', function ($provide, $injector) {
         var self = this;
 
