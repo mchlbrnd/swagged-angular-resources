@@ -47,6 +47,8 @@
   },
   "dependencies": {
     "handlebars": "^2.0.0",
+    "js-beautify": "^1.5.10",
+    "json-stringify-safe": "^5.0.1",
     "mkdirp": "^0.5.1",
     "request": "^2.49.0",
     "underscore": "^1.7.0",
