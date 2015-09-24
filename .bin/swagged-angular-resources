@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var _, apiUrlOrFile, argv, fileOrUrl, fs, getCode, getParameters, getResourceOperations, handlebars, log, mkdirp, mockTemplate, ngDoc, ngMockModuleOutput, ngModule, ngModuleOutput, path, providerTemplate, readFileAsJSON, readUrlAsJSON, registerHelpers, registerPartialFromFile, request, templateBase, url;
+var _, apiUrlOrFile, argv, beautify, fileOrUrl, fs, getCode, getParameters, getResourceOperations, handlebars, log, mkdirp, mockTemplate, ngDoc, ngMockModuleOutput, ngModule, ngModuleOutput, path, providerTemplate, readFileAsJSON, readUrlAsJSON, registerHelpers, registerPartialFromFile, request, templateBase, url;
 
 fs = require("fs");
 
@@ -18,6 +18,8 @@ handlebars = require("handlebars");
 argv = require("yargs").argv;
 
 mkdirp = require("mkdirp");
+
+beautify = require("js-beautify").js_beautify;
 
 if (argv._.length === 0) {
   throw "Expected: swagged-angular-resources swagger-docs-url|swagger-docs-file [--ngmodule swaggedAngularResources [--strip-trailing-slashes false [--output index.js [--mock-output false]]]]";
@@ -199,7 +201,7 @@ getCode = function(error, apiDefinition) {
       if (!fs.existsSync(ngModuleOutput)) {
         mkdirp.sync(path.dirname(ngModuleOutput));
       }
-      return fs.writeFile(ngModuleOutput, code, {
+      return fs.writeFile(ngModuleOutput, beautify(code), {
         encoding: "utf-8"
       }, function(error) {
         if (error) {
@@ -220,7 +222,7 @@ getCode = function(error, apiDefinition) {
         if (!fs.existsSync(ngMockModuleOutput)) {
           mkdirp.sync(path.dirname(ngMockModuleOutput));
         }
-        return fs.writeFile(ngMockModuleOutput, code, {
+        return fs.writeFile(ngMockModuleOutput, beautify(code), {
           encoding: "utf-8"
         }, function(error) {
           if (error) {
