@@ -1,8 +1,6 @@
 (function (angular) {
     var app = angular.module('petStore', ['petStoreResources']);
 
-    app.constant('apiUrl', 'http://petstore.swagger.io/v2');
-
     app.config(function (PetProvider) {
         PetProvider.config({
             getPetById: {
@@ -20,9 +18,21 @@
     });
 
     app.controller('PetStoreController', function ($scope, Pet, getPetByIdConfig) {
-        $scope.pets = [
-            Pet.$config(getPetByIdConfig).getPetById({petId: 1}), // should succeed, timeout = 5s
-            Pet.getPetById({petId: 2}) // should be cancelled, timeout = 1ms
-        ];
+        $scope.pets = [];
+
+        function addPet (pet) {
+            $scope.pets.push(pet);
+        }
+
+        var Milo = new Pet({name: 'Milo'});
+        var Kitty = new Pet({name: 'Kitty'});
+
+        Milo.$addPet(function (milo) {
+            Pet.getPetById({petId: milo.id}, addPet); // should be cancelled, timeout = 1ms
+        });
+
+        Kitty.$addPet(function (kitty) {
+            Pet.$config(getPetByIdConfig).getPetById({petId: kitty.id}, addPet); // should succeed, timeout = 5s
+        });
     });
 }(angular));
